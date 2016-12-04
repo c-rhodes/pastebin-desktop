@@ -30,6 +30,7 @@ class Pastebin(ttk.Frame):
 
     def initUI(self):
         self.master.title("Pastebin for Desktop")
+        self.master.iconbitmap("icon.ico")
         self.master.resizable(FALSE, FALSE)
 
         ### frames ###
@@ -119,6 +120,8 @@ class Pastebin(ttk.Frame):
         self.entry_password = ttk.Entry(self.loginbar, textvariable=self.password, show="*") 
     
         self.button_login = ttk.Button(self.loginbar, text="Login", command=self.login)
+
+        
     
     
         ### loginbar geometry ### 
@@ -239,7 +242,7 @@ class Pastebin(ttk.Frame):
                 self.entry_pastetitle.delete(0, END)            # refresh entry box
                 self.label_submit.grid(row=1, column=1, sticky=W)
                 self.label_submit.after(5000, lambda: self.label_submit.grid_forget())	# display message for 5 seconds
-                self.notify(request)
+                self.notify(request, title="Pastebin uploaded.")
 
         except (urllib.error.HTTPError, urllib.error.URLError) as error:
             self.error("Failed to connect to pastebin.com, check your connection")
@@ -252,9 +255,21 @@ class Pastebin(ttk.Frame):
             return
 
         webbrowser.open("http://pastebin.com/u/" + self.username.get())
+
+    def copyToBoard(self, window, message):
+        window.clipboard_clear()
+        window.clipboard_append(message)
     
-    def notify(self, message):
-        messagebox.showinfo(message=message)
+    def notify(self, message, title="Message"):
+        notificationWindow=Tk()
+        notificationWindow.title(title)
+        notificationWindow.iconbitmap("icon.ico")
+        text=Label(notificationWindow, text=message, pady=10)
+        copyToClipboardBtn = Button(notificationWindow, text="Copy to clipboard", command=lambda:self.copyToBoard(notificationWindow, message))
+        exitBtn = Button(notificationWindow, text="Ok", command=notificationWindow.destroy)
+        text.grid(row=0, column=0, columnspan=2)
+        copyToClipboardBtn.grid(row=1, column=0)
+        exitBtn.grid(row=1, column=1)
 
     def error(self, message):
         messagebox.showinfo(message=message, icon="error")
